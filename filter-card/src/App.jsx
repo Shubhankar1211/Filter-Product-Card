@@ -1,34 +1,85 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import CoverScreen from './components/CoverScreen.jsx'
+import Guess from './components/Guess.jsx'
+import AfterGame from './components/AfterGame.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
+  let defaultGameState = {
+    step: 0,
+    total_score: 0,
+    guess_number: 0,
+    difficulty: ""
+  };
+
+  const [gameState, setGameState] = useState(defaultGameState);
+
+  function setGameStep(step) {
+    let newGameState = {
+      ...gameState,
+      step: step
+    }
+    setGameState(newGameState)
+  }
+
+  function incrementScoreGuess(score) {
+    let newGameState = {
+      ...gameState,
+      total_score: gameState.total_score + score,
+      guess_number: gameState.guess_number + 1
+    }
+
+    setGameState(newGameState)
+  }
+
+  function incrementNbGuess() {
+    let newGameState = {
+      ...gameState,
+      guess_number: gameState.guess_number + 1
+    }
+
+    setGameState(newGameState)
+  }
+
+
+  function startGame(difficulty) {
+    let newGameState = {
+      ...gameState,
+      step: 1,
+      difficulty: difficulty
+    }
+    setGameState(newGameState)
+  }
+
+  useEffect(() => {
+
+    if (gameState.guess_number >= 10) {
+      //End game
+      setGameStep(2)
+    }
+
+  }, [gameState.guess_number]);
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="h-screen bg-[url(bg.jpg)]  bg-cover bg-center  flex">
+      <div className="w-full max-w-lg flex min-h-3/5 max-h-[90%] mx-auto my-auto rounded-3xl shadow-lg">
+        {
+          gameState.step == 0 && 
+          <CoverScreen onGameStart={(difficulty) => startGame(difficulty)} ></CoverScreen>
+        }
+        {
+          gameState.step == 1 && 
+          <Guess 
+            gameState={gameState}
+            onTotalScoreChange={incrementScoreGuess} onNbGuessChange={incrementNbGuess}
+          />
+        }
+        {
+          gameState.step == 2 && 
+          <AfterGame gameState={gameState} onStepChange={() => setGameStep(0)} />
+        }
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
